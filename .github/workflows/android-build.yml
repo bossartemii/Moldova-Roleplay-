@@ -1,0 +1,102 @@
+name: Android ARM64 build
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - integration/sanandreasunity-pinned
+    paths:
+      - '.github/workflows/android-build.yml'
+      - 'vendor/SanAndreasUnity/**'
+      - '.gitmodules'
+
+permissions:
+  contents: read
+
+jobs:
+  android-arm64:
+    name: Build Android APK (ARM64)
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout repository and pinned engine submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          lfs: true
+
+      - name: Check Unity project files
+        shell: bash
+        run: |
+          test -f vendor/SanAndreasUnity/ProjectSettings/ProjectVersion.txt
+          test -d vendor/SanAndreasUnity/Assets
+          echo "Unity project found:"
+          cat vendor/SanAndreasUnity/ProjectSettings/ProjectVersion.txt
+
+      - name: Prepare ARM64 build entry point
+        shell: bash
+        run: |
+          mkdir -p vendor/SanAndreasUnity/Assets/Editor
+          cat > vendor/SanAndreasUnity/Assets/Editor/MoldovaCiAndroidBuild.cs <<'CS'
+          using System;
+          using UnityEditor;
+          using UnityEditor.Build.Reporting;
+          using UnityEngine;
+
+          public static class MoldovaCiAndroidBuild
+          {
+              public static void Build()
+              {
+                  EditorUserBuildSettings.SwitchActiveBuildTarget(
+                      BuildTargetGroup.Android, BuildTarget.Android);
+
+                  PlayerSettings.SetScriptingBackend(
+                      BuildTargetGroup.Android, ScriptingImplementation.IL2CPP);
+                  PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
+
+                  var scenes = Array.FindAll(
+                      EditorBuildSettings.scenes, scene => scene.enabled);
+                  if (scenes.Length == 0)
+                      throw new Exception("No enabled scenes found in EditorBuildSettings.");
+
+                  var output = "build/Android/MoldovaRoleplay.apk";
+                  System.IO.Directory.CreateDirectory("build/Android");
+
+                  var options = new BuildPlayerOptions
+                  {
+                      scenes = Array.ConvertAll(scenes, scene => scene.path),
+                      locationPathName = output,
+                      target = BuildTarget.Android,
+                      options = BuildOptions.None
+                  };
+
+                  BuildReport report = BuildPipeline.BuildPlayer(options);
+                  if (report.summary.result != BuildResult.Succeeded)
+                      throw new Exception("Android build failed: " + report.summary.result
+                          + " (" + report.summary.totalErrors + " errors).");
+
+                  Debug.Log("MOLDOVA_ANDROID_APK=" + output);
+                  Debug.Log("MOLDOVA_ANDROID_SIZE=" + report.summary.totalSize);
+              }
+          }
+          CS
+
+      - name: Build with Unity 2020.3.26f1
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          projectPath: vendor/SanAndreasUnity
+          unityVersion: 2020.3.26f1
+          targetPlatform: Android
+          buildMethod: MoldovaCiAndroidBuild.Build
+          androidExportType: androidPackage
+
+      - name: Upload APK artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Moldova-Roleplay-Android-ARM64
+          path: vendor/SanAndreasUnity/build/Android/MoldovaRoleplay.apk
+          if-no-files-found: error
+          retention-days: 7
