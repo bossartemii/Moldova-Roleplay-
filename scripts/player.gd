@@ -1,15 +1,20 @@
 extends CharacterBody3D
 
+signal interaction_message_changed(message: String)
+
 const WALK_SPEED := 5.2
 const SPRINT_SPEED := 7.4
 const GRAVITY := 18.0
 const JUMP_VELOCITY := 4.5
+const INTERACTION_DISTANCE := 4.2
 
 var camera_pivot: Node3D
 var camera: Camera3D
 var mobile_move := Vector2.ZERO
 var sprinting := false
 var jump_requested := false
+var last_interaction_message := ""
+var _last_target_id := 0
 
 func _ready() -> void:
     var visual := MeshInstance3D.new()
@@ -52,7 +57,6 @@ func _physics_process(delta: float) -> void:
     if input_vector.length_squared() < 0.0025:
         input_vector = mobile_move
 
-    # Movement follows the camera yaw, as expected from a third-person mobile game.
     var camera_basis := camera_pivot.global_transform.basis
     var forward := -camera_basis.z
     var right := camera_basis.x
@@ -83,3 +87,31 @@ func request_jump() -> void:
 func rotate_camera(relative_motion: Vector2) -> void:
     camera_pivot.rotate_y(-relative_motion.x * 0.004)
     camera.rotation.x = clampf(camera.rotation.x - relative_motion.y * 0.003, -0.65, 0.25)
+
+func get_interaction_prompt() -> String:
+    var target := _get_interaction_target()
+    if target == null:
+        return ""
+    return str(target.get_meta("interaction_prompt", "Interagisci"))
+
+func try_interact() -> void:
+    var target := _get_interaction_target()
+    if target == null:
+        return
+    last_interaction_message = str(target.get_meta("interaction_message", "Non c'è nulla da fare qui."))
+    interaction_message_changed.emit(last_interaction_message)
+
+func _get_interaction_target() -> Node:
+    if camera == null or not is_inside_tree():
+        return null
+    var origin := camera.global_position
+    var end := origin + (-camera.global_basis.z * INTERACTION_DISTANCE)
+    var query := PhysicsRayQueryParameters3D.create(origin, end)
+    query.exclude = [get_rid()]
+    var hit := get_world_3d().direct_space_state.intersect_ray(query)
+    if hit.is_empty():
+        return null
+    var collider = hit.get("collider")
+    if collider is Node and collider.has_meta("interaction_message"):
+        return collider
+    return null
