@@ -1,32 +1,36 @@
 # Open-source implementation stack
 
-## Active engine direction
+## Active runtime: Godot 4
 
-**SanAndreasUnity** is the selected legacy engine candidate for evaluation.
+Godot 4 is the active engine for this branch.
 
-- Upstream: https://github.com/in0finite/SanAndreasUnity
-- Pinned commit: `f685c437f48721afc0787f27d22c85d96e8684c7`
-- Integration: Git submodule at `vendor/SanAndreasUnity`
-- Upstream top-level license: MIT
-- Audit: [SANANDREASUNITY_INTEGRATION.md](SANANDREASUNITY_INTEGRATION.md)
+- Project: this repository's root `project.godot`
+- Main scene: `scenes/main.tscn`
+- Player prototype: `scripts/player.gd`
+- Mobile HUD: `scripts/mobile_hud.gd`
+- World greybox: `scripts/world.gd`
+- Renderer: Compatibility / GL Compatibility, selected for broad mobile hardware support.
 
-This is not yet approved for release. The pinned upstream is from 2022, uses Unity 2020.3.26f1, and its Android settings select ARMv7 only with old SDK levels. Nested submodule license gaps and prebuilt DLL provenance remain open. Do not upgrade, ship or expose a public server until the audit gates are completed.
+Godot is open source under the MIT license. Review the license for every external plugin, asset pack, font, sound and model added later; do not assume the engine license covers third-party content.
 
-## Legacy research (not the active runtime)
+## References to evaluate, not blindly import
 
-The earlier Godot research remains documented for history, but it is superseded by the Unity direction:
 - Godot third-person controller: https://github.com/selgesel/godot4-third-person-controller
-- SAJE framework: https://github.com/ekulbyrnes/saje
+- SAJE: https://github.com/ekulbyrnes/saje
 - Godot dedicated-server example: https://github.com/SlayHorizon/godot-dedicated-server-example
 
-These repositories are not integrated into the active Unity runtime. Do not mix Godot scripts or dependencies into SanAndreasUnity.
+These are reference projects only until their current maintenance state, Godot compatibility, license, security and Android behavior are independently checked. Do not copy code or assets without preserving their license and attribution.
 
-## Integration rules
+## Historical Unity experiment
 
-1. Pin exact commits for every upstream repository and nested submodule.
-2. Keep each applicable license and attribution notice; never infer that one repository's license covers its submodules.
-3. Verify source provenance, binary dependencies and redistribution rights before shipping.
-4. Do not import copyrighted game maps, models, textures, audio, characters or branding without explicit rights.
-5. Keep economy, inventory, jobs, property, rewards and moderation authoritative on the server.
-6. Never describe a feature as implemented, multiplayer-ready or production-ready until it exists and has been tested.
-7. Prefer traceable Git submodules or small audited changes over blind repository copying.
+The `vendor/SanAndreasUnity` submodule and Unity integration documents are retained for traceability. They are not loaded by the Godot project and are not part of the active runtime. Do not delete them as part of Godot development without a separate explicit decision.
+
+## Architecture rules
+
+1. Keep the Android client responsive and avoid expensive per-frame allocations.
+2. Treat all client input as untrusted.
+3. Keep money, inventory, jobs, property, rewards, moderation and player positions validated by the server.
+4. Never trust client-reported currency, item ownership, damage or progression.
+5. Pin exact revisions and audit licenses before adding external dependencies.
+6. Use original or explicitly licensed game assets; GTA San Andreas assets are not open source.
+7. Do not call the game multiplayer-ready, persistent or production-ready until those systems are implemented and tested.
