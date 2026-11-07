@@ -28,7 +28,7 @@ func _notification(what: int) -> void:
 func _process(_delta: float) -> void:
     if is_instance_valid(player):
         player.set_mobile_move(stick)
-        var next_prompt := player.get_interaction_prompt()
+        var next_prompt: String = player.get_interaction_prompt()
         var next_message := player.last_interaction_message
         if next_prompt != interaction_prompt or next_message != last_message:
             interaction_prompt = next_prompt
