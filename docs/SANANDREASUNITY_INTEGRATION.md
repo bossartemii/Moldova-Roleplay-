@@ -28,6 +28,19 @@ The upstream README documents:
 
 These are upstream claims and historical capabilities. They are not proof that the pinned project builds on current Android, works on current devices, or is production-safe.
 
+## Android touch-input inspection
+
+The pinned source does contain a native touch HUD; this is not a keyboard-only project:
+- `Assets/Scripts/UI/TouchInput.cs` creates separate on-foot and vehicle controls.
+- The on-foot HUD includes movement arrows, walk/sprint, jump, crouch, enter, aim/fire and weapon buttons.
+- Vehicle mode has steering arrows, forward/reverse, handbrake and exit controls.
+- Dragging the touch panel feeds camera rotation.
+- `UIManager` enables touch input by default on mobile platforms.
+
+This is useful groundwork, but it is not the polished Android control scheme we want. Movement uses an arrow-style control rather than a modern analogue virtual joystick; camera rotation is driven by panel drag. The touch layout, safe areas, multi-touch behaviour, scaling and accessibility still need device testing and redesign.
+
+A concrete upstream defect was found in `TouchInput.cs`: the next/previous radio-station buttons set the same flags used for next/previous weapon, which then emit the weapon-cycle keys. Those buttons therefore appear wired to weapon switching instead of radio switching. Fix and regression-test this when adapting the mobile HUD.
+
 ## Android blockers found in the checked-in settings
 
 The pinned `ProjectSettings/ProjectSettings.asset` contains:
