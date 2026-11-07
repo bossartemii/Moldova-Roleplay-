@@ -8,6 +8,7 @@ var center := Vector2.ZERO
 var radius := 68.0
 var stick_visual := Vector2.ZERO
 var stick_vector := Vector2.ZERO
+var is_stick_active := false
 
 # Tracking Indici Touch
 var stick_id := -1
@@ -20,8 +21,8 @@ var jump_rect := Rect2()
 var use_rect := Rect2()
 var button_size := 72.0
 
-var interaction_prompt := ""
-var last_message := ""
+var interaction_prompt: String = ""
+var last_message: String = ""
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
@@ -39,18 +40,17 @@ func _process(_delta: float) -> void:
 		_find_player()
 		return
 
-	# Invia il vettore al player invertendo Y (nello schermo UP è negativo, per il player UP è positivo)
+	# Invia il vettore al player
 	player.set_mobile_move(stick_vector)
 
-	var next_prompt := player.get_interaction_prompt()
-	var next_message := player.last_interaction_message
+	var next_prompt: String = player.get_interaction_prompt()
+	var next_message: String = player.last_interaction_message
 	if next_prompt != interaction_prompt or next_message != last_message:
 		interaction_prompt = next_prompt
 		last_message = next_message
 		queue_redraw()
 
 func _find_player() -> void:
-	# Cerca LocalPlayer nella scena corrente, oppure il primo CharacterBody3D disponibile
 	player = get_tree().current_scene.get_node_or_null("LocalPlayer")
 	if player == null:
 		player = get_tree().current_scene.find_child("LocalPlayer", true, false) as CharacterBody3D
@@ -76,15 +76,15 @@ func _gui_input(event: InputEvent) -> void:
 
 	if event is InputEventScreenTouch:
 		if event.pressed:
-			# METÀ SINISTRA: Gestione Joystick
+			# ZONA SINISTRA: Solo ed esclusivamente Joystick
 			if event.position.x < screen_width * 0.5:
 				if stick_id == -1:
 					stick_id = event.index
-					# Riposiziona il centro sul punto di contatto per massima comodità (floating joystick)
+					is_stick_active = true
 					center = event.position
 					_update_stick(event.position)
 					needs_redraw = true
-			# METÀ DESTRA: Pulsanti e Rotazione Camera
+			# ZONA DESTRA: Pulsanti o Telecamera
 			else:
 				if not interaction_prompt.is_empty() and use_rect.has_point(event.position):
 					if is_instance_valid(player):
@@ -100,9 +100,10 @@ func _gui_input(event: InputEvent) -> void:
 				elif look_id == -1:
 					look_id = event.index
 		else:
-			# Rilascio Touch
+			# Rilascio touch
 			if event.index == stick_id:
 				stick_id = -1
+				is_stick_active = false
 				stick_visual = Vector2.ZERO
 				stick_vector = Vector2.ZERO
 				center = default_center
@@ -134,18 +135,18 @@ func _update_stick(touch_position: Vector2) -> void:
 
 	var clamped_dist := minf(dist, radius)
 	stick_visual = (dir * clamped_dist) / radius
-	# stick_vector: X = Destra/Sinistra, Y = invertito per allineare l'avanzamento 3D
+	# Asse X = dx/sx, Asse Y invertito per coordinate 3D (-Y dello schermo = +Z in avanti)
 	stick_vector = Vector2(stick_visual.x, -stick_visual.y)
 
 func _draw() -> void:
 	var screen_size := get_viewport_rect().size
 
-	# 1. Joystick
+	# 1. Base e pomello del joystick
 	draw_circle(center, radius, Color(0.04, 0.07, 0.1, 0.38))
 	draw_arc(center, radius, 0.0, TAU, 48, Color(0.9, 0.93, 0.96, 0.6), 2.0)
 	draw_circle(center + stick_visual * radius * 0.65, radius * 0.36, Color(0.82, 0.88, 0.94, 0.75))
 
-	# 2. Pulsanti
+	# 2. Pulsanti azione
 	var run_active := (run_id != -1)
 	_draw_button(run_rect, "CORRI", run_active)
 	_draw_button(jump_rect, "SALTA", false)
@@ -157,7 +158,7 @@ func _draw() -> void:
 		draw_rect(prompt_rect, Color(0.9, 0.93, 0.96, 0.4), false, 1.5)
 		draw_string(ThemeDB.fallback_font, prompt_rect.position + Vector2(0.0, 30.0), interaction_prompt, HORIZONTAL_ALIGNMENT_CENTER, prompt_rect.size.x, 16, Color.WHITE)
 
-	# 3. Watermark e Notifiche
+	# 3. Informazioni UI
 	draw_string(ThemeDB.fallback_font, Vector2(24.0, 36.0), "MOLDOVA ROLEPLAY", HORIZONTAL_ALIGNMENT_LEFT, -1.0, 16, Color(1.0, 1.0, 1.0, 0.85))
 	if not last_message.is_empty():
 		draw_string(ThemeDB.fallback_font, Vector2(24.0, 62.0), last_message, HORIZONTAL_ALIGNMENT_LEFT, screen_size.x * 0.6, 14, Color("ffe3a3"))
