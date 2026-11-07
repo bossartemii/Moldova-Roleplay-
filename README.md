@@ -2,50 +2,46 @@
 
 Android-first 3D serious roleplay project set in Chișinău, Moldova.
 
-## Current status
+## Active engine: Godot 4
 
-The repository now contains a pinned Git submodule reference to the SanAndreasUnity engine candidate at `vendor/SanAndreasUnity`.
+The active development direction is **Godot 4**, using the existing Godot prototype as the base. The Unity/SanAndreasUnity experiment is retained in repository history and its existing integration branch; it is not the active runtime for this branch.
 
-**This is not yet a playable Moldova Roleplay build.** The selected upstream is a legacy Unity project (2020.3.26f1; last inspected upstream commit dated 2022-09-30). Its checked-in Android settings target API 28 and ARMv7 only. ARM64, modern Android SDK settings, current Unity compatibility, dependency licensing and physical-device tests are still open.
+**Current state: early playable-prototype scaffold, not a finished game.** The repository contains a procedural greybox city block, a third-person capsule player, a follow camera and a basic touch HUD. It has not yet been built as an APK or tested on a physical Android device.
 
-The previous Godot prototype remains in the repository unchanged as legacy work. The active engine evaluation is Unity; Godot scripts are not part of the Unity runtime.
+## Open the project
 
-## Get the source
+Use Godot 4.4 or a compatible Godot 4.x release:
 
-Clone with all submodules:
+1. Import this repository as a Godot project by selecting the root `project.godot`.
+2. Run the main scene `scenes/main.tscn`.
+3. The current scene is a placeholder greybox, not a detailed reconstruction of Chișinău.
 
-```bash
-git clone --recurse-submodules https://github.com/bossartemii/Moldova-Roleplay-.git
-cd Moldova-Roleplay-
-git submodule update --init --recursive
-```
+## Android direction
 
-Open `vendor/SanAndreasUnity` in the Unity editor version recorded in its `ProjectSettings/ProjectVersion.txt` (2020.3.26f1 for the pinned revision).
-
-Do not treat that old editor version as the final release toolchain. The Android migration plan requires a separate, tested Unity upgrade and an IL2CPP + ARM64 build configuration.
-
-## Product direction
-
-- Original Chișinău-inspired city map and districts.
-- Serious roleplay with character identity, jobs, public services and businesses.
-- Server-authoritative MDL economy, inventory, property and progression.
-- Original/licensed vehicles, buildings, clothing, characters and audio.
+- Android-first landscape gameplay and touch controls.
+- Original Chișinău-inspired streets, districts and landmarks.
+- Third-person movement, camera drag, sprint and jump.
+- Original or separately licensed vehicles, buildings, clothing, characters and audio.
 - Romanian, Russian, Italian and English localization.
-- Android-first touch HUD, virtual joystick, camera drag and contextual action buttons.
+- Future authoritative multiplayer server and persistent roleplay systems.
+
+An Android APK still requires Godot export templates and the Android SDK/JDK configured in a build environment. No APK has been built or device-tested yet.
 
 ## Legal boundary
 
-SanAndreasUnity's upstream code is MIT-licensed at the pinned revision. Its nested dependencies have separate license status; some remain unverified. GTA San Andreas game data and Rockstar assets are not covered by that MIT license. Do not commit, bundle or redistribute them. Moldova Roleplay must use original or separately licensed assets.
+GTA San Andreas is not open source. Its source code, game data, map, models, textures, audio, characters and branding are not licensed for redistribution by this project. Do not commit, bundle or redistribute Rockstar assets. Use original assets or assets with explicit compatible licenses.
 
-## Audit and roadmap
+The SanAndreasUnity submodule and Unity documentation are retained as historical research only. They are not required to open or run the Godot project.
 
-See [SanAndreasUnity integration audit](docs/SANANDREASUNITY_INTEGRATION.md), [open-source stack](docs/OPEN_SOURCE_STACK.md) and [third-party notices](THIRD_PARTY_NOTICES.md).
+## Roadmap
 
-1. Resolve nested dependency licenses and binary provenance.
-2. Open the pinned Unity project and record import/compiler errors.
-3. Upgrade Unity and Android settings in a separate branch.
-4. Build an ARM64/IL2CPP debug APK and test on a physical Android device.
-5. Validate touch controls, networking, server authority, security and performance.
-6. Replace upstream game-specific content with original Moldova Roleplay systems.
+See [Godot Android implementation plan](docs/GODOT_ANDROID_PLAN.md) and [open-source stack](docs/OPEN_SOURCE_STACK.md).
 
-No APK has been built or device-tested yet. Do not publish or advertise this as a playable release.
+1. Stabilize the Godot scene and Android touch controls.
+2. Add original low-poly city assets and a larger explorable district.
+3. Implement a drivable vehicle prototype.
+4. Add a dedicated authoritative multiplayer server.
+5. Implement authentication, character identity, jobs, MDL economy, inventory and property persistence.
+6. Build an ARM64 Android APK and test performance, touch input, safe areas and reconnect behavior on a physical device.
+
+Do not describe multiplayer, persistence, a vehicle system or an Android release as implemented until it exists and has been tested.
