@@ -75,7 +75,7 @@ func _add_windows(building_position: Vector3, index: int) -> void:
 func _add_street_furniture() -> void:
     for z in range(-80, 81, 32):
         for side in [-1.0, 1.0]:
-            var x := side * 12.5
+            var x: float = float(side) * 12.5
             _box("Lamp_Post_%d_%d" % [int(x), z], Vector3(x, 3.0, z), Vector3(0.18, 6.0, 0.18), Color("343a3d"))
             _box("Lamp_Head_%d_%d" % [int(x), z], Vector3(x, 6.0, z), Vector3(1.0, 0.18, 0.35), Color("d9d2b4"))
 
