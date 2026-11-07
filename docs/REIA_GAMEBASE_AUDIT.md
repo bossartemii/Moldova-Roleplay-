@@ -7,6 +7,7 @@ Audit date: 2026-11-07
 - Project: https://github.com/Quaint-Studios/Reia
 - Description: open-source 3D action-adventure RPG built with Godot and Rust.
 - Upstream branch shown by GitHub: `master`.
+- Top-level LICENSE: GNU Affero General Public License v3 (AGPL-3.0), verified from the upstream LICENSE file.
 - Public repository snapshot: approximately 1,030 commits and 991 stars at audit time.
 - Repository topics include Godot 4, 3D, MMO/MMORPG, multiplayer and mobile-game.
 - README describes offline play, online co-op and an intended MMO mode; it also describes procedural areas, character progression, player-owned islands, marketplace and modding.
@@ -29,7 +30,7 @@ Not reusable as-is:
 
 The README itself says the project is still being developed, identifies upcoming UI/map/quest/networking work, and says there is no announced alpha/beta date. The `mobile-game` topic is not proof of a working Android APK. Treat Reia as a promising existing game codebase, not a finished production-ready mobile MMORPG.
 
-The repository's top-level LICENSE is linked from GitHub, but this audit does not yet pin the exact upstream commit or verify every nested dependency, submodule, Git LFS asset, Rust crate, and asset-specific license. No upstream code or assets are copied by this audit.
+The top-level code license is AGPL-3.0, not MIT. If we modify and operate covered server software for users over a network, AGPLv3 section 13 requires offering those users the Corresponding Source of the modified version. This has real consequences for a hosted commercial game and must be accepted deliberately. This audit does not yet pin the exact upstream commit or verify every nested dependency, submodule, Git LFS asset, Rust crate, or asset-specific license. No upstream code or assets are copied by this audit.
 
 ## Required gate before importing
 
