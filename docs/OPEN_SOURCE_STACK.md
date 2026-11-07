@@ -1,41 +1,32 @@
 # Open-source implementation stack
 
-This project must reuse audited open-source components where they fit. Do not reimplement mature systems merely to claim originality.
+## Active engine direction
 
-## Selected upstream projects
+**SanAndreasUnity** is the selected legacy engine candidate for evaluation.
 
-### 1. Third-person and touchscreen controller
-- Upstream: https://github.com/selgesel/godot4-third-person-controller
-- License: MIT (verified from upstream LICENSE; copyright Selgesel, 2021).
-- Fit: Godot 4 controller with touchscreen joystick/gesture support.
-- Planned use: inspect and port the minimal player/camera/touch-control components into this project, preserving the upstream MIT notice. Adapt movement and UI for serious roleplay; do not import unrelated swimming mechanics without need.
-- Status: selected for integration; not yet vendored or tested in this repository.
+- Upstream: https://github.com/in0finite/SanAndreasUnity
+- Pinned commit: `f685c437f48721afc0787f27d22c85d96e8684c7`
+- Integration: Git submodule at `vendor/SanAndreasUnity`
+- Upstream top-level license: MIT
+- Audit: [SANANDREASUNITY_INTEGRATION.md](SANANDREASUNITY_INTEGRATION.md)
 
-### 2. Multiplayer architecture and server framework reference
-- Upstream: https://github.com/ekulbyrnes/saje
-- License: MIT (verified from upstream LICENSE; copyright slayhorizon, 2025).
-- Fit: Godot 4.4+ experimental open-source MMORPG framework with gateway/master/world-server separation, authentication, accounts, character creation, entity synchronization, instance chat and server-side NPCs.
-- Planned use: evaluate and reuse compatible networking/server modules as the foundation for the persistent world. Replace fantasy RPG classes/combat and unsuitable game rules with Moldova Roleplay systems.
-- Caution: upstream describes itself as experimental; its README lists interpolation and server-side anti-cheat as unfinished. It is not production-ready security by itself.
-- Status: selected for deeper code/dependency audit; no upstream code copied yet.
+This is not yet approved for release. The pinned upstream is from 2022, uses Unity 2020.3.26f1, and its Android settings select ARMv7 only with old SDK levels. Nested submodule license gaps and prebuilt DLL provenance remain open. Do not upgrade, ship or expose a public server until the audit gates are completed.
 
-### 3. Dedicated server separation example
-- Upstream: https://github.com/SlayHorizon/godot-dedicated-server-example
-- License: MIT (verified from upstream LICENSE; copyright slayhorizon, 2025).
-- Fit: separate Godot client and dedicated-server projects, compatible with Godot 4.x–4.5 according to upstream README.
-- Planned use: architectural reference if SAJE's server packaging needs separation.
-- Status: reference only; no code copied.
+## Legacy research (not the active runtime)
+
+The earlier Godot research remains documented for history, but it is superseded by the Unity direction:
+- Godot third-person controller: https://github.com/selgesel/godot4-third-person-controller
+- SAJE framework: https://github.com/ekulbyrnes/saje
+- Godot dedicated-server example: https://github.com/SlayHorizon/godot-dedicated-server-example
+
+These repositories are not integrated into the active Unity runtime. Do not mix Godot scripts or dependencies into SanAndreasUnity.
 
 ## Integration rules
 
-1. Verify the exact upstream commit, license, asset licenses, dependencies and security posture before copying code.
-2. Keep each upstream LICENSE and required copyright/attribution notices.
-3. Record imported files and source commit in THIRD_PARTY_NOTICES.md.
-4. Do not import game art, maps, characters, audio or branding unless their individual licenses explicitly permit it.
-5. Keep authoritative economy, inventory, jobs, property, moderation and anti-cheat validation on the server.
-6. Do not describe the game as multiplayer, persistent or production-ready until those features are implemented and tested.
-7. Prefer small, traceable integrations over copying entire repositories blindly.
-
-## Product-specific systems to implement
-
-Original Moldova Roleplay code will define the Chișinău map, MDL economy, Romanian/Italian/Russian/English localization, serious-RP rules, jobs, vehicles, property, legal system, moderation and progression.
+1. Pin exact commits for every upstream repository and nested submodule.
+2. Keep each applicable license and attribution notice; never infer that one repository's license covers its submodules.
+3. Verify source provenance, binary dependencies and redistribution rights before shipping.
+4. Do not import copyrighted game maps, models, textures, audio, characters or branding without explicit rights.
+5. Keep economy, inventory, jobs, property, rewards and moderation authoritative on the server.
+6. Never describe a feature as implemented, multiplayer-ready or production-ready until it exists and has been tested.
+7. Prefer traceable Git submodules or small audited changes over blind repository copying.
