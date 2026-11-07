@@ -1,0 +1,3 @@
+[submodule "vendor/SanAndreasUnity"]
+	path = vendor/SanAndreasUnity
+	url = https://github.com/in0finite/SanAndreasUnity.git
