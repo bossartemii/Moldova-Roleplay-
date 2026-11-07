@@ -1,0 +1,14 @@
+.godot/
+.export/
+android/build/
+*.apk
+*.aab
+.env
+.env.*
+*.keystore
+*.jks
+*.p12
+*.pem
+.DS_Store
+.idea/
+.vscode/
