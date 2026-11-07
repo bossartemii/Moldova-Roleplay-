@@ -28,9 +28,12 @@ func _notification(what: int) -> void:
 func _process(_delta: float) -> void:
     if is_instance_valid(player):
         player.set_mobile_move(stick)
-        interaction_prompt = player.get_interaction_prompt()
-        last_message = player.last_interaction_message
-        queue_redraw()
+        var next_prompt := player.get_interaction_prompt()
+        var next_message := player.last_interaction_message
+        if next_prompt != interaction_prompt or next_message != last_message:
+            interaction_prompt = next_prompt
+            last_message = next_message
+            queue_redraw()
 
 func _layout() -> void:
     var size := get_viewport_rect().size
