@@ -9,6 +9,7 @@ const JUMP_VELOCITY := 4.5
 const INTERACTION_DISTANCE := 3.5
 const JUMP_BUFFER_TIME := 0.15
 
+var visual: MeshInstance3D
 var camera_pivot: Node3D
 var spring_arm: SpringArm3D
 var camera: Camera3D
@@ -18,11 +19,11 @@ var sprinting := false
 var jump_buffer_timer := 0.0
 
 var current_interaction_target: Node = null
-var last_interaction_message := ""
+var last_interaction_message: String = ""
 
 func _ready() -> void:
-	# 1. Mesh Visiva (Capsula segnaposto)
-	var visual := MeshInstance3D.new()
+	# 1. Mesh visiva (ruota indipendentemente dalla camera)
+	visual = MeshInstance3D.new()
 	var capsule := CapsuleMesh.new()
 	capsule.radius = 0.42
 	capsule.height = 1.8
@@ -33,7 +34,7 @@ func _ready() -> void:
 	visual.material_override = material
 	add_child(visual)
 
-	# 2. Collision Shape
+	# 2. Collisione
 	var collision := CollisionShape3D.new()
 	var capsule_shape := CapsuleShape3D.new()
 	capsule_shape.radius = 0.42
@@ -42,7 +43,7 @@ func _ready() -> void:
 	collision.position.y = 0.9
 	add_child(collision)
 
-	# 3. Pivot e SpringArm (Previene clipping nei muri e orbita corretta)
+	# 3. Pivot e Telecamera
 	camera_pivot = Node3D.new()
 	camera_pivot.position.y = 1.55
 	add_child(camera_pivot)
@@ -58,11 +59,9 @@ func _ready() -> void:
 	spring_arm.add_child(camera)
 
 func _physics_process(delta: float) -> void:
-	# Gestione Jump Buffer
 	if jump_buffer_timer > 0.0:
 		jump_buffer_timer -= delta
 
-	# Gravità e Salto
 	if not is_on_floor():
 		velocity.y -= GRAVITY * delta
 	else:
@@ -70,15 +69,15 @@ func _physics_process(delta: float) -> void:
 			velocity.y = JUMP_VELOCITY
 			jump_buffer_timer = 0.0
 
-	# Input: invertito ui_down / ui_up per allineare l'asse Z forward (-Z)
+	# Input: combinazione tastiera + levetta mobile
 	var input_vector := Input.get_vector("ui_left", "ui_right", "ui_down", "ui_up")
 	if input_vector.length_squared() < 0.0025:
 		input_vector = mobile_move
 
-	# Vettori orientati rispetto alla rotazione orizzontale della camera
-	var camera_basis := camera_pivot.global_transform.basis
-	var forward := -camera_basis.z
-	var right := camera_basis.x
+	# Vettori direzionali basati solo sulla rotazione orizzontale del pivot
+	var cam_transform := camera_pivot.global_transform
+	var forward := -cam_transform.basis.z
+	var right := cam_transform.basis.x
 	forward.y = 0.0
 	right.y = 0.0
 	forward = forward.normalized()
@@ -90,15 +89,14 @@ func _physics_process(delta: float) -> void:
 	if direction.length_squared() > 0.0025:
 		velocity.x = direction.x * speed
 		velocity.z = direction.z * speed
+		# Ruota solo il modello visivo verso la direzione di marcia, MAI il nodo radice
 		var target_angle := atan2(-direction.x, -direction.z)
-		rotation.y = lerp_angle(rotation.y, target_angle, minf(delta * 12.0, 1.0))
+		visual.rotation.y = lerp_angle(visual.rotation.y, target_angle, minf(delta * 12.0, 1.0))
 	else:
 		velocity.x = move_toward(velocity.x, 0.0, speed)
 		velocity.z = move_toward(velocity.z, 0.0, speed)
 
 	move_and_slide()
-
-	# Aggiorna il bersaglio di interazione in modo thread-safe all'interno del loop fisico
 	_update_interaction_target()
 
 func _update_interaction_target() -> void:
@@ -107,9 +105,7 @@ func _update_interaction_target() -> void:
 		current_interaction_target = null
 		return
 
-	# Origine: altezza torace del personaggio
 	var origin := global_position + Vector3(0.0, 1.3, 0.0)
-	# Direzione: punta dritto nella direzione dello sguardo della camera
 	var look_direction := -camera.global_transform.basis.z
 	var end := origin + (look_direction * INTERACTION_DISTANCE)
 
@@ -135,7 +131,6 @@ func _find_interactable(node: Node) -> Node:
 	return null
 
 func set_mobile_move(value: Vector2) -> void:
-	# value.y positivo = movimento avanti
 	mobile_move = value.limit_length(1.0)
 
 func set_mobile_sprint(enabled: bool) -> void:
@@ -145,9 +140,7 @@ func request_jump() -> void:
 	jump_buffer_timer = JUMP_BUFFER_TIME
 
 func rotate_camera(relative_motion: Vector2) -> void:
-	# Rotazione Yaw orizzontale sul pivot
 	camera_pivot.rotate_y(-relative_motion.x * 0.004)
-	# Rotazione Pitch verticale sullo SpringArm (clamp per evitare capovolgimenti)
 	spring_arm.rotation.x = clampf(spring_arm.rotation.x - relative_motion.y * 0.003, deg_to_rad(-60.0), deg_to_rad(25.0))
 
 func get_interaction_prompt() -> String:
